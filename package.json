@@ -1,0 +1,98 @@
+{
+  "name": "f1-web-viewer",
+  "description": "A simple grid-based web viewer for Formula 1",
+  "author": "bootsie123",
+  "version": "1.7.14",
+  "private": true,
+  "homepage": "https://github.com/bootsie123/F1-Web-Viewer",
+  "scripts": {
+    "start": "node functions/server.js",
+    "dev": "nodemon functions/server.js",
+    "lint": "vue-cli-service lint",
+    "build": "npm run vue:build -- --modern",
+    "build-all": "npm run vue:build && npm run electron:build",
+    "vue:build": "vue-cli-service build",
+    "vue:serve": "vue-cli-service serve",
+    "electron:build": "npm run electron:generate-icons && vue-cli-service electron:build",
+    "electron:serve": "vue-cli-service electron:serve",
+    "electron:generate-icons": "electron-icon-builder --input=./public/icon.png --output=build --flatten",
+    "release": "npm run electron:generate-icons && vue-cli-service electron:build --publish always"
+  },
+  "main": "background.js",
+  "dependencies": {
+    "axios": "^0.21.4",
+    "bulma": "^0.9.3",
+    "compression": "^1.7.4",
+    "connect-history-api-fallback": "^1.6.0",
+    "core-js": "^3.6.5",
+    "cors": "^2.8.5",
+    "cors-anywhere": "^0.4.4",
+    "dotenv": "^10.0.0",
+    "electron-store": "^8.0.0",
+    "electron-updater": "^4.3.9",
+    "express": "^4.17.1",
+    "helmet": "^4.4.1",
+    "mobile-drag-drop": "^2.3.0-rc.2",
+    "node-fetch": "^2.6.7",
+    "remixicon": "^2.5.0",
+    "serverless-http": "^2.7.0",
+    "uuid": "^8.3.2",
+    "video.js": "^7.16.0",
+    "videojs-contrib-dash": "^5.1.1",
+    "videojs-contrib-quality-levels": "^2.1.0",
+    "videojs-http-source-selector-2": "^1.1.10",
+    "vue": "^2.6.11",
+    "vue-grid-layout": "^2.3.12",
+    "vue-router": "^3.3.4",
+    "vuex": "^3.4.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~4.4.0",
+    "@vue/cli-plugin-eslint": "~4.4.0",
+    "@vue/cli-plugin-router": "^4.4.6",
+    "@vue/cli-service": "^4.5.13",
+    "babel-eslint": "^10.1.0",
+    "electron": "^13.5.2",
+    "electron-devtools-installer": "^3.2.0",
+    "electron-icon-builder": "^2.0.1",
+    "eslint": "^6.7.2",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-vue": "^6.2.2",
+    "nodemon": "^2.0.7",
+    "prettier": "2.1.2",
+    "sass": "^1.41.0",
+    "sass-loader": "^8.0.2",
+    "vue-cli-plugin-electron-builder": "^2.0.0",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended",
+      "prettier"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {}
+  },
+  "prettier": {
+    "printWidth": 120,
+    "semi": true,
+    "quoteProps": "as-needed",
+    "trailingComma": "none",
+    "bracketSpacing": true,
+    "jsxBracketSameLine": false,
+    "arrowParens": "avoid",
+    "vueIndentScriptAndStyle": true
+  },
+  "browserslist": [
+    "defaults",
+    "last 2 versions",
+    "not dead"
+  ]
+}

@@ -31,15 +31,11 @@
 <script>
   import videojs from "video.js";
   import { mapGetters } from "vuex";
-
   import "videojs-contrib-quality-levels";
   import "videojs-contrib-dash";
   import "videojs-http-source-selector-2";
-
   import F1TV_API from "@/lib/F1TV_API";
-
   import BaseIconButton from "@/components/BaseIconButton";
-
   export default {
     name: "Feed",
     components: {
@@ -84,7 +80,6 @@
       },
       playback(state) {
         if (!this.player) return;
-
         if (state) {
           this.player.play();
         } else {
@@ -99,67 +94,56 @@
       async initPlayer() {
         this.player = videojs(this.$refs.videoPlayer, this.options);
         this.player.httpSourceSelector();
-
         this.player.on("loadeddata", () => {
+          const levels = this.player.qualityLevels()
+          const bitrates = this.player.dash.mediaPlayer.getBitrateInfoListFor('video');
+          const availableQualities = bitrates.map(({ height, bitrate, width }) => {
+            return {
+              id: height.toString(),
+              height,
+              width,
+              bandwidth: bitrate,
+              bitrate,
+              isEnabled_: true,
+            }
+          })
+          availableQualities.forEach(quality => {
+            levels.addQualityLevel(quality)
+          })
           const tracks = this.player.remoteTextTracks();
-
           for (let i = 0; i < tracks.length; i++) {
             if (tracks[i].kind === "subtitles") {
               tracks[i].mode = "hidden";
             }
           }
         });
-
         this.initialized = true;
-
         this.updateSource();
       },
       async updateSource() {
         if (!this.token) return;
-
-        try {
-          const res = await F1TV_API.getAuthenticatedUrl(this.playbackUrl, this.token);
-
-          if (this.player && res.data?.resultObj?.url) {
-            let url = res.data.resultObj.url;
-
-            if (process.env.VUE_APP_NETLIFY) {
-              url = "https://cors.bridged.cc/" + url;
-            } else if (!process.env.IS_ELECTRON) {
-              const res = await F1TV_API.playToken(url);
-
-              this.player.on("loadstart", () => {
-                this.player.tech({ IWillNotUseThisInPlugins: true }).vhs.xhr.beforeRequest = options => {
-                  options.headers = {
-                    playToken: res.data.playToken,
-                    ...options.headers
-                  };
-
-                  return options;
-                };
-              });
-
-              url = "/proxy/" + url;
-            }
-
-            if (res.data.resultObj.streamType === "DASH") {
-              this.player.src({
-                src: url,
-                keySystemOptions: [
-                  {
-                    name: "com.widevine.alpha",
-                    options: {
-                      serverURL: res.data.resultObj.laURL
-                    }
-                  }
-                ]
-              });
-            } else {
-              this.player.src(url);
-            }
+        const res = await F1TV_API.getAuthenticatedUrl(this.playbackUrl, this.token);
+        let url = res.data?.resultObj?.url;
+        if (this.player && url) {
+          url = "/proxy/" + url;
+          if (res.data?.resultObj.streamType === "DASH") {
+            this.player.src({
+              src: url,
+              type: 'application/dash+xml',
+              withCredentials: true,
+              keySystemOptions: [{
+                name: 'com.widevine.alpha',
+                options: {
+                  serverURL: res.data.resultObj.laURL
+                }
+              }]
+            });
+          } else {
+            this.player.src({
+              src: url,
+              withCredentials: true,
+            });
           }
-        } catch (err) {
-          console.error(err);
         }
       }
     },
@@ -175,32 +159,26 @@
     }
   };
 </script>
-
 <style lang="scss">
   .group {
     width: 100%;
     height: 100%;
   }
-
   .hide {
     background: transparent !important;
   }
-
   .modifier {
     display: none;
     position: absolute;
     z-index: 100;
     color: white;
   }
-
   .vue-grid-item:hover .modifier {
     display: block;
   }
-
   .right-handle {
     right: 0;
   }
-
   .vue-resizable-handle {
     display: none;
     background: url("~@/assets/resize-icon.svg") !important;
@@ -209,7 +187,6 @@
     background-origin: content-box !important;
     -webkit-box-sizing: border-box !important;
   }
-
   .vue-grid-item:hover .vue-resizable-handle {
     display: block !important;
   }

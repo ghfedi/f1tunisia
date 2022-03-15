@@ -2,7 +2,7 @@ import axios from "axios";
 import videojs from "video.js";
 import store from "@/store";
 
-const CORS_PROXY = "https://damp-mouse-7bce.f1webviewer.workers.dev?";
+const CORS_PROXY = "";
 const API_URL = "https://f1tv.formula1.com";
 
 const options = { baseURL: API_URL };

@@ -95,21 +95,6 @@
         this.player = videojs(this.$refs.videoPlayer, this.options);
         this.player.httpSourceSelector();
         this.player.on("loadeddata", () => {
-          const levels = this.player.qualityLevels()
-          const bitrates = this.player.dash.mediaPlayer.getBitrateInfoListFor('video');
-          const availableQualities = bitrates.map(({ height, bitrate, width }) => {
-            return {
-              id: height.toString(),
-              height,
-              width,
-              bandwidth: bitrate,
-              bitrate,
-              isEnabled_: true,
-            }
-          })
-          availableQualities.forEach(quality => {
-            levels.addQualityLevel(quality)
-          })
           const tracks = this.player.remoteTextTracks();
           for (let i = 0; i < tracks.length; i++) {
             if (tracks[i].kind === "subtitles") {
@@ -122,28 +107,43 @@
       },
       async updateSource() {
         if (!this.token) return;
-        const res = await F1TV_API.getAuthenticatedUrl(this.playbackUrl, this.token);
-        let url = res.data?.resultObj?.url;
-        if (this.player && url) {
-          url = "/proxy/" + url;
-          if (res.data?.resultObj.streamType === "DASH") {
-            this.player.src({
-              src: url,
-              type: 'application/dash+xml',
-              withCredentials: true,
-              keySystemOptions: [{
-                name: 'com.widevine.alpha',
-                options: {
-                  serverURL: res.data.resultObj.laURL
-                }
-              }]
-            });
-          } else {
-            this.player.src({
-              src: url,
-              withCredentials: true,
-            });
+        try {
+          const res = await F1TV_API.getAuthenticatedUrl(this.playbackUrl, this.token);
+          if (this.player && res.data?.resultObj?.url) {
+            let url = res.data.resultObj.url;
+            if (process.env.VUE_APP_NETLIFY) {
+              url = "https://cors.bridged.cc/" + url;
+            } else if (!process.env.IS_ELECTRON) {
+              const res = await F1TV_API.playToken(url);
+              this.player.on("loadstart", () => {
+                this.player.tech({ IWillNotUseThisInPlugins: true }).vhs.xhr.beforeRequest = options => {
+                  options.headers = {
+                    playToken: res.data.playToken,
+                    ...options.headers
+                  };
+                  return options;
+                };
+              });
+              url = "/proxy/" + url;
+            }
+            if (res.data.resultObj.streamType === "DASH") {
+              this.player.src({
+                src: url,
+                keySystemOptions: [
+                  {
+                    name: "com.widevine.alpha",
+                    options: {
+                      serverURL: res.data.resultObj.laURL
+                    }
+                  }
+                ]
+              });
+            } else {
+              this.player.src(url);
+            }
           }
+        } catch (err) {
+          console.error(err);
         }
       }
     },

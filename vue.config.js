@@ -11,7 +11,7 @@ module.exports = {
   pages: {
     index: {
       entry: "./src/main.js",
-      title: "F1 Web Viewer"
+      title: "F1 Tunisa"
     }
   },
   css: {

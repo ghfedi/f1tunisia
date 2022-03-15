@@ -26,7 +26,7 @@ module.exports = {
       outputDir: "./dist/electron",
       nodeIntegration: true,
       builderOptions: {
-        appId: "app.netlify.f1webviewer",
+        appId: "app.netlify.f1tunisia",
         productName: "F1 Web Viewer",
         publish: ["github"],
         win: {

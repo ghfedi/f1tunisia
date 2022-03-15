@@ -43,9 +43,12 @@
 
 <script>
   import { mapGetters } from "vuex";
+
   import F1TV_API from "@/lib/F1TV_API";
+
   import ChannelGrid from "@/components/ChannelGrid";
   import BaseDropdown from "@/components/BaseDropdown";
+
   export default {
     name: "FeedManager",
     components: {
@@ -88,34 +91,50 @@
     watch: {
       async series(series) {
         if (!series || !this.event) return;
+
         this.sessionsLoading = true;
+
         this.session = "";
+
         await this.updateSessions(this.event);
+
         this.sessionsLoading = false;
       },
       async season(year) {
         if (!year) return;
+
         this.eventsLoading = true;
+
         this.event = "";
         this.session = "";
+
         this.events = [];
         this.sessions = [];
         this.channels = [];
+
         await this.updateEvents(year);
+
         this.eventsLoading = false;
       },
       async event(eventId) {
         if (!eventId) return;
+
         this.sessionsLoading = true;
+
         this.session = "";
+
         this.sessions = [];
         this.channels = [];
+
         await this.updateSessions(eventId);
+
         this.sessionsLoading = false;
       },
       session(contentId) {
         if (!contentId) return;
+
         this.channels = [];
+
         this.updateChannels(contentId);
       }
     },
@@ -123,17 +142,21 @@
       updateSources() {
         const layout = this.layout.map(item => {
           const channel = this.channels.find(channel => channel.title === item.title);
+
           if (channel) {
             item.playbackUrl = channel.playbackUrl;
             item.live = channel.live;
           }
+
           return item;
         });
+
         this.$store.dispatch("setLayout", layout);
       },
       async updateEvents(year) {
         try {
           let events = await F1TV_API.getEventsFromSeason(year);
+
           this.events = [
             { text: "Select event", ...this.defaultValues },
             ...events.data.resultObj.containers
@@ -155,11 +178,13 @@
       async updateSessions(eventId) {
         try {
           let sessions = await F1TV_API.getSessionFromEvent(eventId);
+
           this.sessions = [
             { text: "Select session", ...this.defaultValues },
             ...sessions.data.resultObj.containers
               .filter(session => {
                 const metadata = session.metadata;
+
                 return (
                   metadata.contentType === "VIDEO" &&
                   metadata.emfAttributes.Series === this.series &&
@@ -181,9 +206,12 @@
       async updateChannels(contentId) {
         try {
           const channels = await F1TV_API.getChannelsFromSession(contentId);
+
           const container = channels.data.resultObj.containers[0];
+
           if (container.metadata.additionalStreams) {
             const isLive = container.metadata.contentSubtype === "LIVE";
+
             const mappedChannels = channels.data.resultObj.containers[0].metadata.additionalStreams.map(channel => {
               return {
                 driverFirstName: channel.driverFirstName,
@@ -195,12 +223,14 @@
                 live: isLive
               };
             });
+
             mappedChannels.push({
               title: "WORLD",
               type: "additional",
               playbackUrl: `CONTENT/PLAY?contentId=${container.contentId}`,
               live: isLive
             });
+
             this.channels = mappedChannels;
           } else {
             this.channels = [
@@ -223,6 +253,7 @@
   .settings {
     padding: 1em;
   }
+
   .settings .button {
     margin-top: 2em;
   }

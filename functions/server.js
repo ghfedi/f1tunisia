@@ -9,7 +9,7 @@ const fetch = require("node-fetch");
 require("dotenv").config();
 
 const app = express();
-const PORT = process.env.SERVER_PORT || 5000;
+const PORT = process.env.SERVER_PORT || 3000;
 
 if (app.get("env") === "production") {
   app.set("trust proxy", 1);
@@ -40,10 +40,8 @@ app.post(
       const data = await fetch("https://api.formula1.com/v2/account/subscriber/authenticate/by-password", {
         method: "POST",
         body: JSON.stringify({
-         // Login: req.body.Login,
-          //Password: req.body.Password
-          Login: "david.garza.m@hotmail.com",
-          Password: "Schumi#1"
+          Login: req.body.Login,
+          Password: req.body.Password
         }),
         headers: {
           "User-Agent": "RaceControl f1viewer",
@@ -104,7 +102,7 @@ if (!process.env.AWS_EXECUTION_ENV) {
     }
   });
 
-  app.listen(PORT, () => console.info(`Server running on port `));
+  app.listen(PORT, () => console.info(`Server running on port ${PORT}`));
 }
 
 process.on("unhandledReject", console.warn);

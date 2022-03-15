@@ -104,7 +104,7 @@ if (!process.env.AWS_EXECUTION_ENV) {
     }
   });
 
-  app.listen(PORT, () => console.info(`Server running on port ${PORT}`));
+  app.listen(PORT, () => console.info(`Server running on port `));
 }
 
 process.on("unhandledReject", console.warn);
